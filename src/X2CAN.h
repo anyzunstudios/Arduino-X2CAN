@@ -77,6 +77,25 @@ class X2CAN
     // Raw access to autowp API
     MCP2515::ERROR rawSend(const struct can_frame &frame);
     MCP2515::ERROR rawRead(struct can_frame &frame);
+
+// --- NEW HELPERS FOR DIAGNOSTICS & AUTO-RECOVERY ---
+
+// Reads a raw register directly from the MCP2515 via SPI.
+// Useful to detect SPI lockups or MCP2515 "zombie state"
+// (returns 0x00 or 0xFF when the chip is not responding properly).
+uint8_t readRegister(uint8_t addr) { 
+    return mcp.readRegister(addr); 
+}
+
+// Returns the raw EFLG (Error Flag) byte from the MCP2515.
+// This allows checking exact error conditions such as:
+// - TXBO (Bus-Off)
+// - TXEP / RXEP (Error Passive)
+// - RX0OVR / RX1OVR (Buffer Overflows)
+// Perfect for implementing custom CAN error-handling logic.
+uint8_t getErrorFlagsRaw() { 
+    return mcp.getErrorFlags(); 
+}
 };
 
 #endif // _X2CAN_H_
